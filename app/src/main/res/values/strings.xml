@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">DiplomaWork</string>
+
+    <string name="app_title">УЧЁТЫШ</string>
+    <string name="app_subtitle">приложение по учёту заявок</string>
+    <string name="choose_action">Выберите действие:</string>
+    <string name="requests_action">Действия с заявками</string>
+    <string name="stats_action">Действия со статистикой</string>
+    <string name="logo_description">Логотип приложения</string>
+    <string name="add_request">Добавить заявку</string>
+    <string name="edit_request">Изменить заявку</string>
+    <string name="view_requests">Посмотреть заявки</string>
+    <string name="back_button">Назад</string>
+
+</resources>

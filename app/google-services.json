@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "347636659329",
+    "project_id": "dimlomawork",
+    "storage_bucket": "dimlomawork.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:347636659329:android:9e9508b2c69947c901c980",
+        "android_client_info": {
+          "package_name": "com.kvork_app.diplomawork"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8GjxVWamSCLSWebUZo9aN67SUe3LLXHs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
