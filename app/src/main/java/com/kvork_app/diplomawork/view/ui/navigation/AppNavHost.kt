@@ -4,10 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.kvork_app.diplomawork.view.ui.screens.ActionStatisticsScreen
 import com.kvork_app.diplomawork.view.ui.screens.AddRequestScreen
+import com.kvork_app.diplomawork.view.ui.screens.AddressStatsScreen
 import com.kvork_app.diplomawork.view.ui.screens.ChangesApplicationScreen
 import com.kvork_app.diplomawork.view.ui.screens.MainScreenConstraint
 import com.kvork_app.diplomawork.view.ui.screens.RequestActionsScreen
+import com.kvork_app.diplomawork.view.ui.screens.StatisticsScreen
+import com.kvork_app.diplomawork.view.ui.screens.ViewRequestsScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -15,7 +19,7 @@ fun AppNavHost(navController: NavHostController) {
         composable(Screen.Main.route) {
             MainScreenConstraint(
                 onNavigateToRequests = { navController.navigate(Screen.Requests.route) },
-                onNavigateToStats = { /* Пока не реализовано */ }
+                onNavigateToStats = { navController.navigate(Screen.AllStats.route) }
             )
         }
 
@@ -25,7 +29,15 @@ fun AppNavHost(navController: NavHostController) {
                 onBackClick = { navController.popBackStack() },
                 onAddRequest = { navController.navigate(Screen.AddRequest.route) },
                 onEditRequest = { navController.navigate(Screen.EditRequest.route) },
-                onViewRequests = { /* Здесь можно обрабатывать просмотр заявок */ }
+                onViewRequests = { navController.navigate(Screen.ViewRequest.route) }
+            )
+        }
+        composable(Screen.AllStats.route) {
+            ActionStatisticsScreen(
+                navController = navController,
+                onBackClick = {navController.popBackStack()},
+                onMaterialStatistics = {navController.navigate(Screen.Statistics.route)},
+                onAddressStatistics = {navController.navigate(Screen.AddressStats.route)}
             )
         }
 
@@ -40,6 +52,21 @@ fun AppNavHost(navController: NavHostController) {
             ChangesApplicationScreen(
                 onBackClick = { navController.popBackStack() },
                 onUpdate = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.ViewRequest.route) {
+            ViewRequestsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable (Screen.Statistics.route) {
+            StatisticsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable (Screen.AddressStats.route) {
+            AddressStatsScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

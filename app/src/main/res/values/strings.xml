@@ -8,6 +8,8 @@
     <string name="stats_action">Действия со статистикой</string>
     <string name="logo_description">Логотип приложения</string>
     <string name="add_request">Добавление заявки</string>
+    <string name="material_stats">Статистика по материалам</string>
+    <string name="address_stats">Статистика по адресам</string>
     <string name="edit_request">Изменить заявку</string>
     <string name="view_requests">Посмотреть заявки</string>
     <string name="back_button">Назад</string>

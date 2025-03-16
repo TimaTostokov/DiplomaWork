@@ -3,11 +3,15 @@ package com.kvork_app.diplomawork.view.ui.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,13 +37,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.kvork_app.diplomawork.R
 import com.kvork_app.diplomawork.model.RequestItem
 
@@ -49,18 +53,20 @@ fun StatisticsScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
-    val sampleRequests = listOf(
-        RequestItem("1", "Замена розетки", "зарегана"),
-        RequestItem("2", "Починка крана", "в работе"),
-        RequestItem("3", "Укладка плитки", "выполнено"),
-        RequestItem("4", "Монтаж потолка", "снята"),
-        RequestItem("5", "Обслуживание котла", "зарегана"),
-        RequestItem("6", "Установка дверей", "в работе"),
-        RequestItem("7", "Замена замка", "снята")
-    )
+    val sampleRequests = List(30) { index ->
+        RequestItem(
+            id = (index + 1).toString(),
+            description = "Описание заявки ${index + 1}",
+            status = when (index % 4) {
+                0 -> "зарегана"
+                1 -> "в работе"
+                2 -> "выполнено"
+                else -> "снята"
+            }
+        )
+    }
 
     var searchQuery by remember { mutableStateOf("") }
-
     val statusList = listOf("зарегана", "в работе", "выполнено", "снята")
     var expandedSort by remember { mutableStateOf(false) }
     var selectedSortStatus by remember { mutableStateOf("Все") }
@@ -71,160 +77,130 @@ fun StatisticsScreen(
         matchesStatus && matchesSearch
     }
 
-    ConstraintLayout(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        val (
-            backBtnRef,
-            logoRef,
-            titleRef,
-            subtitleRef,
-            screenTitleRef,
-            headerRowRef,
-            listRef
-        ) = createRefs()
-
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier.constrainAs(backBtnRef) {
-                top.linkTo(parent.top, margin = 16.dp)
-                start.linkTo(parent.start, margin = 16.dp)
-            }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_arrow_back),
-                contentDescription = stringResource(R.string.back_button)
-            )
-        }
-
-        Image(
-            painter = painterResource(id = R.drawable.ic_logo),
-            contentDescription = stringResource(R.string.logo_description),
-            modifier = Modifier.constrainAs(logoRef) {
-                top.linkTo(parent.top, margin = 16.dp)
-                start.linkTo(backBtnRef.end, margin = 8.dp)
-            }
-        )
-
-        Text(
-            text = stringResource(R.string.app_title),
-            fontSize = 28.sp,
-            color = Color(0xFF00AA00),
-            modifier = Modifier.constrainAs(titleRef) {
-                top.linkTo(parent.top, margin = 16.dp)
-                start.linkTo(logoRef.end, margin = 12.dp)
-            }
-        )
-
-        Text(
-            text = stringResource(R.string.app_subtitle),
-            fontSize = 16.sp,
-            color = Color.Black,
-            modifier = Modifier.constrainAs(subtitleRef) {
-                top.linkTo(titleRef.bottom, margin = 4.dp)
-                start.linkTo(titleRef.start)
-            }
-        )
-
-        Text(
-            text = "Cтатистика по материалам",
-            fontSize = 20.sp,
-            color = Color.Black,
-            modifier = Modifier.constrainAs(screenTitleRef) {
-                top.linkTo(logoRef.bottom, margin = 32.dp)
-                centerHorizontallyTo(parent)
-            }
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(headerRowRef) {
-                    top.linkTo(screenTitleRef.bottom, margin = 24.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                singleLine = true,
-                placeholder = { Text("Поиск") },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Search
-                ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.images),
-                        contentDescription = "Search Icon"
-                    )
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
-            )
-
-            Box {
-                Button(
-                    onClick = {
-                        focusManager.clearFocus()
-                        expandedSort = !expandedSort
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .height(56.dp)
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.padding(end = 8.dp)
                 ) {
-                    Text(
-                        text = "Сортировка по годам",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        textAlign = TextAlign.Center
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_arrow_back),
+                        contentDescription = stringResource(R.string.back_button)
                     )
                 }
-
-                DropdownMenu(
-                    expanded = expandedSort,
-                    onDismissRequest = { expandedSort = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Все") },
-                        onClick = {
-                            selectedSortStatus = "Все"
-                            expandedSort = false
-                        }
+                Image(
+                    painter = painterResource(id = R.drawable.ic_logo),
+                    contentDescription = stringResource(R.string.logo_description),
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = stringResource(R.string.app_title),
+                        fontSize = 28.sp,
+                        color = Color(0xFF00AA00),
+                        fontWeight = FontWeight.Bold
                     )
-                    statusList.forEach { status ->
+                    Text(
+                        text = stringResource(R.string.app_subtitle),
+                        fontSize = 16.sp,
+                        color = Color.Black
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Cтатистика по материалам",
+                    fontSize = 20.sp,
+                    color = Color.Black
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    singleLine = true,
+                    placeholder = { Text("Поиск") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Search
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.images),
+                            contentDescription = "Search Icon"
+                        )
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                )
+
+                Box {
+                    Button(
+                        onClick = {
+                            focusManager.clearFocus()
+                            expandedSort = !expandedSort
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .height(56.dp)
+                    ) {
+                        Text(
+                            text = "Сортировка по статусу",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = expandedSort,
+                        onDismissRequest = { expandedSort = false }
+                    ) {
                         DropdownMenuItem(
-                            text = { Text(status) },
+                            text = { Text("Все") },
                             onClick = {
-                                selectedSortStatus = status
+                                selectedSortStatus = "Все"
                                 expandedSort = false
                             }
                         )
+                        statusList.forEach { status ->
+                            DropdownMenuItem(
+                                text = { Text(status) },
+                                onClick = {
+                                    selectedSortStatus = status
+                                    expandedSort = false
+                                }
+                            )
+                        }
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .constrainAs(listRef) {
-                    top.linkTo(headerRowRef.bottom, margin = 24.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                }
-                .fillMaxWidth()
-        ) {
-            items(filteredRequests) { request ->
-                RequestRowStatistics(request)
-            }
+        items(filteredRequests) { request ->
+            RequestRowStatistics(request)
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -36,13 +35,13 @@ fun AddRequestScreen(
     var description by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
     var masterFio by remember { mutableStateOf("") }
-
-    val statusOptions = listOf("Открыта", "В работе", "Завершена")
+    val statusOptions = listOf("зарегистрирована", "в работе", "выполнено", "снята")
     var expanded by remember { mutableStateOf(false) }
 
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         val (backBtnRef, logoRef, titleRef, subtitleRef, screenTitleRef, formBoxRef) = createRefs()
@@ -108,9 +107,9 @@ fun AddRequestScreen(
                     centerHorizontallyTo(parent)
                 }
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
         ) {
             Column(horizontalAlignment = Alignment.Start) {
+
                 @Composable
                 fun textFieldRow(label: String, value: String, onValueChange: (String) -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -131,19 +130,10 @@ fun AddRequestScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                textFieldRow(
-                    stringResource(R.string.date_of_registration),
-                    dateOfRegistration
-                ) { dateOfRegistration = it }
+                textFieldRow(stringResource(R.string.date_of_registration), dateOfRegistration) { dateOfRegistration = it }
                 textFieldRow(stringResource(R.string.address), address) { address = it }
-                textFieldRow(
-                    stringResource(R.string.contact_applicant),
-                    contact
-                ) { contact = it }
-                textFieldRow(
-                    stringResource(R.string.description),
-                    description
-                ) { description = it }
+                textFieldRow(stringResource(R.string.contact_applicant), contact) { contact = it }
+                textFieldRow(stringResource(R.string.description), description) { description = it }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(

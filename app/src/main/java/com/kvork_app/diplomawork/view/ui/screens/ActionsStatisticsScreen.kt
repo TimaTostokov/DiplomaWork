@@ -1,29 +1,37 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.kvork_app.diplomawork.R
-import com.kvork_app.diplomawork.view.ui.navigation.Screen
 
 @Composable
-fun RequestActionsScreen(
+fun ActionStatisticsScreen(
     navController: NavController,
     onBackClick: () -> Unit,
-    onAddRequest: () -> Unit,
-    onEditRequest: () -> Unit,
-    onViewRequests: () -> Unit
+    onMaterialStatistics: () -> Unit,
+    onAddressStatistics: () -> Unit
 ) {
     ConstraintLayout(
         modifier = Modifier
@@ -96,7 +104,7 @@ fun RequestActionsScreen(
         )
 
         Button(
-            onClick = onAddRequest ,
+            onClick =  onMaterialStatistics,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
             modifier = Modifier
                 .width(250.dp)
@@ -107,14 +115,17 @@ fun RequestActionsScreen(
                 }
         ) {
             Text(
-                text = stringResource(id = R.string.add_request),
+                text = stringResource(id = R.string.material_stats),
                 fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
         }
 
+
         Button(
-            onClick = onEditRequest,
+            onClick = onAddressStatistics,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
             modifier = Modifier
                 .width(250.dp)
@@ -125,43 +136,25 @@ fun RequestActionsScreen(
                 }
         ) {
             Text(
-                text = stringResource(id = R.string.edit_request),
+                text = stringResource(id = R.string.address_stats),
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
-        Button(
-            onClick = onViewRequests,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
-            modifier = Modifier
-                .width(250.dp)
-                .height(60.dp)
-                .constrainAs(viewBtnRef) {
-                    top.linkTo(editBtnRef.bottom, margin = 16.dp)
-                    centerHorizontallyTo(parent)
-                }
-        ) {
-            Text(
-                text = stringResource(id = R.string.view_requests),
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        }
     }
 }
 
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Preview(showBackground = true, device = "spec:width=1280dp,height=800dp")
 @Composable
-fun RequestActionsScreenPreview() {
+fun ActionsStatisticsScreenPreview() {
     val navController = androidx.navigation.compose.rememberNavController()
-    RequestActionsScreen(
+    ActionStatisticsScreen(
         navController,
-        onAddRequest = { /* TODO */ },
-        onEditRequest = { /* TODO */ },
-        onViewRequests = { /* TODO */ },
-        onBackClick = { /* TODO */ }
+        onBackClick = {},
+        onMaterialStatistics = {},
+        onAddressStatistics = {}
     )
 
 }

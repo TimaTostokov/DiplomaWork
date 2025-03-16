@@ -34,12 +34,10 @@ fun ChangesApplicationScreen(
     var contact by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
 
-    // Множественный выбор материалов
     val materialOptions = listOf("Материал 1", "Материал 2", "Материал 3")
     var expandedMaterials by remember { mutableStateOf(false) }
     var selectedMaterials by remember { mutableStateOf(emptyList<String>()) }
 
-    // Одиночный выбор статуса
     val statusOptions = listOf("Открыта", "В работе", "Завершена")
     var expandedStatus by remember { mutableStateOf(false) }
     var status by remember { mutableStateOf("") }
@@ -49,6 +47,7 @@ fun ChangesApplicationScreen(
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState()) // добавляем вертикальную прокрутку для всего экрана
             .padding(16.dp)
     ) {
         val (backBtnRef, logoRef, titleRef, subtitleRef, screenTitleRef, formBoxRef) = createRefs()
@@ -114,7 +113,6 @@ fun ChangesApplicationScreen(
                     centerHorizontallyTo(parent)
                 }
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
         ) {
             Column(horizontalAlignment = Alignment.Start) {
 
