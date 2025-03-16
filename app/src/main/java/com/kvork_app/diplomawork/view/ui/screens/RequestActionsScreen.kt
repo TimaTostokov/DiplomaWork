@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -16,6 +15,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.kvork_app.diplomawork.R
+import com.kvork_app.diplomawork.view.ui.navigation.Screen
 
 @Composable
 fun RequestActionsScreen(
@@ -49,13 +49,12 @@ fun RequestActionsScreen(
             }
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_arrow_back), // Замените на нужную иконку
-                contentDescription = "Back",
+                painter = painterResource(R.drawable.ic_arrow_back),
+                contentDescription = stringResource(id = R.string.back_button_english),
                 tint = Color.Black
             )
         }
 
-        // Лого (если не нужно, можно убрать)
         Image(
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = stringResource(id = R.string.logo_description),
@@ -67,7 +66,6 @@ fun RequestActionsScreen(
                 }
         )
 
-        // Заголовок приложения
         Text(
             text = stringResource(id = R.string.app_title),
             fontSize = 28.sp,
@@ -78,7 +76,6 @@ fun RequestActionsScreen(
             }
         )
 
-        // Подзаголовок
         Text(
             text = stringResource(id = R.string.app_subtitle),
             fontSize = 16.sp,
@@ -89,7 +86,6 @@ fun RequestActionsScreen(
             }
         )
 
-        // Текст "Выберите действие"
         Text(
             text = stringResource(id = R.string.choose_action),
             fontSize = 18.sp,
@@ -99,9 +95,8 @@ fun RequestActionsScreen(
             }
         )
 
-        // Кнопка "Добавить заявку"
         Button(
-            onClick = onAddRequest,
+            onClick = { navController.navigate(Screen.AddRequest.route) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
             modifier = Modifier
                 .width(250.dp)
@@ -118,7 +113,6 @@ fun RequestActionsScreen(
             )
         }
 
-        // Кнопка "Изменить заявку"
         Button(
             onClick = onEditRequest,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
@@ -137,7 +131,6 @@ fun RequestActionsScreen(
             )
         }
 
-        // Кнопка "Посмотреть заявки"
         Button(
             onClick = onViewRequests,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
@@ -158,17 +151,17 @@ fun RequestActionsScreen(
     }
 }
 
-
-
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Preview(showBackground = true, device = "spec:width=1280dp,height=800dp")
 @Composable
 fun RequestActionsScreenPreview() {
-    val navController = rememberNavController()
+    val navController = androidx.navigation.compose.rememberNavController()
     RequestActionsScreen(
         navController,
-        onAddRequest = { /*TODO*/ },
-        onEditRequest = { /*TODO*/ },
-        onViewRequests = { /*TODO*/ },
-        onBackClick ={ /*TODO*/ } )
+        onAddRequest = { /* TODO */ },
+        onEditRequest = { /* TODO */ },
+        onViewRequests = { /* TODO */ },
+        onBackClick = { /* TODO */ }
+    )
+
 }

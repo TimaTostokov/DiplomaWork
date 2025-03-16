@@ -7,9 +7,17 @@
     <string name="requests_action">Действия с заявками</string>
     <string name="stats_action">Действия со статистикой</string>
     <string name="logo_description">Логотип приложения</string>
-    <string name="add_request">Добавить заявку</string>
+    <string name="add_request">Добавление заявки</string>
     <string name="edit_request">Изменить заявку</string>
     <string name="view_requests">Посмотреть заявки</string>
     <string name="back_button">Назад</string>
+    <string name="back_button_english">Back</string>
+    <string name="date_of_registration">Дата регистрации:</string>
+    <string name="address">Адрес:</string>
+    <string name="contact_applicant">Контакт заявителя:</string>
+    <string name="description">Описание:</string>
+    <string name="status">Статус:</string>
+    <string name="master_fio">ФИО мастера:</string>
+    <string name="submit_button">ОФОРМИТЬ</string>
 
 </resources>

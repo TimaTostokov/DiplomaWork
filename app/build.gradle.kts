@@ -74,6 +74,12 @@ dependencies {
     implementation(libs.firebase.analytics)
 
     //ConstraintLayout
-    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation (libs.androidx.constraintlayout.compose)
+
+    //SplashScreen
+    implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
 }

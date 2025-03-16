@@ -1,7 +1,6 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,9 +23,9 @@ import com.kvork_app.diplomawork.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddRequestScreen(
+fun ChangesApplicationScreen(
     onBackClick: () -> Unit,
-    onSubmit: () -> Unit
+    onUpdate: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -34,11 +33,18 @@ fun AddRequestScreen(
     var address by remember { mutableStateOf("") }
     var contact by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var status by remember { mutableStateOf("") }
-    var masterFio by remember { mutableStateOf("") }
 
+    // Множественный выбор материалов
+    val materialOptions = listOf("Материал 1", "Материал 2", "Материал 3")
+    var expandedMaterials by remember { mutableStateOf(false) }
+    var selectedMaterials by remember { mutableStateOf(emptyList<String>()) }
+
+    // Одиночный выбор статуса
     val statusOptions = listOf("Открыта", "В работе", "Завершена")
-    var expanded by remember { mutableStateOf(false) }
+    var expandedStatus by remember { mutableStateOf(false) }
+    var status by remember { mutableStateOf("") }
+
+    var masterFio by remember { mutableStateOf("") }
 
     ConstraintLayout(
         modifier = Modifier
@@ -91,7 +97,7 @@ fun AddRequestScreen(
         )
 
         Text(
-            text = stringResource(R.string.add_request),
+            text = "Изменение заявки",
             fontSize = 20.sp,
             color = Color.Black,
             fontWeight = FontWeight.SemiBold,
@@ -111,6 +117,7 @@ fun AddRequestScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Column(horizontalAlignment = Alignment.Start) {
+
                 @Composable
                 fun textFieldRow(label: String, value: String, onValueChange: (String) -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -131,53 +138,64 @@ fun AddRequestScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                textFieldRow(
-                    stringResource(R.string.date_of_registration),
-                    dateOfRegistration
-                ) { dateOfRegistration = it }
-                textFieldRow(stringResource(R.string.address), address) { address = it }
-                textFieldRow(
-                    stringResource(R.string.contact_applicant),
-                    contact
-                ) { contact = it }
-                textFieldRow(
-                    stringResource(R.string.description),
-                    description
-                ) { description = it }
+                textFieldRow("Дата регистрации:", dateOfRegistration) { dateOfRegistration = it }
+                textFieldRow("Адрес:", address) { address = it }
+                textFieldRow("Контакт заявителя:", contact) { contact = it }
+                textFieldRow("Тип проведенных работ:", description) { description = it }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = stringResource(R.string.status),
+                        text = "Материалы:",
                         fontSize = 16.sp,
                         modifier = Modifier.width(150.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
+                        expanded = expandedMaterials,
+                        onExpandedChange = { expandedMaterials = !expandedMaterials },
                         modifier = Modifier.width(200.dp)
                     ) {
                         TextField(
-                            value = status,
+                            value = selectedMaterials.joinToString(", "),
                             onValueChange = {},
                             readOnly = true,
                             singleLine = true,
                             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
                             trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMaterials)
                             },
                             colors = ExposedDropdownMenuDefaults.textFieldColors()
                         )
                         ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            expanded = expandedMaterials,
+                            onDismissRequest = { expandedMaterials = false }
                         ) {
-                            statusOptions.forEach { option ->
+                            materialOptions.forEach { option ->
                                 DropdownMenuItem(
-                                    text = { Text(option) },
+                                    text = {
+                                        Row {
+                                            val isSelected = option in selectedMaterials
+                                            Checkbox(
+                                                checked = isSelected,
+                                                onCheckedChange = { checked ->
+                                                    selectedMaterials = if (checked) {
+                                                        selectedMaterials + option
+                                                    } else {
+                                                        selectedMaterials - option
+                                                    }
+                                                }
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(option)
+                                        }
+                                    },
                                     onClick = {
-                                        status = option
-                                        expanded = false
+                                        val isSelected = option in selectedMaterials
+                                        selectedMaterials = if (isSelected) {
+                                            selectedMaterials - option
+                                        } else {
+                                            selectedMaterials + option
+                                        }
                                     }
                                 )
                             }
@@ -187,20 +205,62 @@ fun AddRequestScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                textFieldRow(stringResource(R.string.master_fio), masterFio) { masterFio = it }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Статус:",
+                        fontSize = 16.sp,
+                        modifier = Modifier.width(150.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ExposedDropdownMenuBox(
+                        expanded = expandedStatus,
+                        onExpandedChange = { expandedStatus = !expandedStatus },
+                        modifier = Modifier.width(200.dp)
+                    ) {
+                        TextField(
+                            value = status,
+                            onValueChange = {},
+                            readOnly = true,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedStatus)
+                            },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedStatus,
+                            onDismissRequest = { expandedStatus = false }
+                        ) {
+                            statusOptions.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(option) },
+                                    onClick = {
+                                        status = option
+                                        expandedStatus = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                textFieldRow("ФИО мастера:", masterFio) { masterFio = it }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
                         focusManager.clearFocus()
-                        onSubmit()
+                        onUpdate()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
                     Text(
-                        text = stringResource(R.string.submit_button),
+                        text = "ИЗМЕНИТЬ",
                         color = Color.White
                     )
                 }
@@ -212,9 +272,9 @@ fun AddRequestScreen(
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
 @Preview(showBackground = true, device = "spec:width=1280dp,height=800dp")
 @Composable
-fun AddRequestScreenPreview() {
-    AddRequestScreen(
+fun ChangesApplicationScreenPreview() {
+    ChangesApplicationScreen(
         onBackClick = {},
-        onSubmit = {}
+        onUpdate = {}
     )
 }

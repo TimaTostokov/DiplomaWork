@@ -12,8 +12,13 @@ composeBom = "2025.03.00"
 koin-version = "3.4.0"
 firebaseBom = "33.10.0"
 koinAndroidxCompose = "3.4.0"
+lifecycleVersion = "2.8.7"
+coreSplashscreen = "1.0.1"
+constraintlayoutCompose = "1.1.1"
 
 [libraries]
+
+androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
@@ -36,6 +41,11 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin-version"}
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
+
+androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleVersion" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleVersion" }
+
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
