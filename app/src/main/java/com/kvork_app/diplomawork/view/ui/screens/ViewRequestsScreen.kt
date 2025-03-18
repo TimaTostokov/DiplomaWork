@@ -1,20 +1,12 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,35 +21,46 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
-import com.kvork_app.diplomawork.model.RequestItem
+import com.kvork_app.diplomawork.model.dto.RequestItem
+import com.kvork_app.diplomawork.utils.RequestIntent
+import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
 fun ViewRequestsScreen(
+    viewModel: RequestViewModel = viewModel(),
     onBackClick: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
-    val sampleRequests = listOf(
-        RequestItem("1", "Замена розетки", "зарегана"),
-        RequestItem("2", "Починка крана", "в работе"),
-        RequestItem("3", "Укладка плитки", "выполнено"),
-        RequestItem("4", "Монтаж потолка", "снята"),
-        RequestItem("5", "Обслуживание котла", "зарегана"),
-        RequestItem("6", "Установка дверей", "в работе"),
-        RequestItem("7", "Замена замка", "снята")
-    )
+    // При первом показе экрана — загрузим все заявки
+    LaunchedEffect(Unit) {
+        viewModel.handleIntent(RequestIntent.LoadAllRequests)
+    }
 
+    val uiState by viewModel.state.collectAsState()
+
+    uiState.errorMessage?.let { errorMsg ->
+        Log.e("ViewRequestsScreen", "Ошибка: $errorMsg")
+    }
+
+    val allRequests = uiState.requests
+
+    // Локальный поиск и сортировка
     var searchQuery by remember { mutableStateOf("") }
 
-    val statusList = listOf("зарегана", "в работе", "выполнено", "снята")
+    val statusList = listOf("Все", "зарегана", "в работе", "выполнено", "снята")
     var expandedSort by remember { mutableStateOf(false) }
     var selectedSortStatus by remember { mutableStateOf("Все") }
 
-    val filteredRequests = sampleRequests.filter { request ->
-        val matchesStatus = (selectedSortStatus == "Все" || request.status == selectedSortStatus)
-        val matchesSearch = request.description.contains(searchQuery, ignoreCase = true)
-        matchesStatus && matchesSearch
+    // Фильтруем из общего списка
+    val filteredRequests = allRequests.filter { request ->
+        val statusMatch = if (selectedSortStatus == "Все") true
+        else request.status.equals(selectedSortStatus, ignoreCase = true)
+        val searchMatch = request.description.contains(searchQuery, ignoreCase = true)
+                || request.id.contains(searchQuery, ignoreCase = true)
+        statusMatch && searchMatch
     }
 
     ConstraintLayout(
@@ -142,7 +145,7 @@ fun ViewRequestsScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 singleLine = true,
-                placeholder = { Text("Поиск") },
+                placeholder = { Text("Поиск по описанию или id") },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Search
@@ -172,22 +175,14 @@ fun ViewRequestsScreen(
                     Text(
                         text = "Сортировка по статусу",
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
-
                 DropdownMenu(
                     expanded = expandedSort,
                     onDismissRequest = { expandedSort = false }
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("Все") },
-                        onClick = {
-                            selectedSortStatus = "Все"
-                            expandedSort = false
-                        }
-                    )
                     statusList.forEach { status ->
                         DropdownMenuItem(
                             text = { Text(status) },

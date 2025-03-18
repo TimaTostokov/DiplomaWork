@@ -1,235 +1,170 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import android.util.Log
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
-import com.kvork_app.diplomawork.model.RequestItem
+import com.kvork_app.diplomawork.model.dto.RequestItem
+import com.kvork_app.diplomawork.utils.RequestIntent
+import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
 fun StatisticsScreen(
+    viewModel: RequestViewModel = viewModel(),
     onBackClick: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
-    val sampleRequests = List(30) { index ->
-        RequestItem(
-            id = (index + 1).toString(),
-            description = "Описание заявки ${index + 1}",
-            status = when (index % 4) {
-                0 -> "зарегана"
-                1 -> "в работе"
-                2 -> "выполнено"
-                else -> "снята"
-            }
-        )
+    // При заходе на экран — загрузим все заявки
+    LaunchedEffect(Unit) {
+        viewModel.handleIntent(RequestIntent.LoadAllRequests)
     }
 
-    var searchQuery by remember { mutableStateOf("") }
-    val statusList = listOf("зарегана", "в работе", "выполнено", "снята")
-    var expandedSort by remember { mutableStateOf(false) }
-    var selectedSortStatus by remember { mutableStateOf("Все") }
+    val uiState by viewModel.state.collectAsState()
+    val allRequests = uiState.requests
 
-    val filteredRequests = sampleRequests.filter { request ->
-        val matchesStatus = (selectedSortStatus == "Все" || request.status == selectedSortStatus)
-        val matchesSearch = request.description.contains(searchQuery, ignoreCase = true)
-        matchesStatus && matchesSearch
+    uiState.errorMessage?.let { errorMsg ->
+        Log.e("StatisticsScreen", "Ошибка: $errorMsg")
     }
 
-    LazyColumn(
+    // Здесь вы можете реализовать любую фильтрацию (материалы, адрес, год и т.д.)
+    var yearQuery by remember { mutableStateOf("") }
+
+    ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onBackClick,
-                    modifier = Modifier.padding(end = 8.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_back),
-                        contentDescription = stringResource(R.string.back_button)
-                    )
-                }
-                Image(
-                    painter = painterResource(id = R.drawable.ic_logo),
-                    contentDescription = stringResource(R.string.logo_description),
-                    modifier = Modifier.size(40.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Column {
-                    Text(
-                        text = stringResource(R.string.app_title),
-                        fontSize = 28.sp,
-                        color = Color(0xFF00AA00),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = stringResource(R.string.app_subtitle),
-                        fontSize = 16.sp,
-                        color = Color.Black
-                    )
-                }
+        val (backBtnRef, screenTitleRef, controlsRef, listRef) = createRefs()
+
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier.constrainAs(backBtnRef) {
+                top.linkTo(parent.top, margin = 16.dp)
+                start.linkTo(parent.start)
             }
-            Spacer(modifier = Modifier.height(24.dp))
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Cтатистика по материалам",
-                    fontSize = 20.sp,
-                    color = Color.Black
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_arrow_back),
+                contentDescription = stringResource(R.string.back_button)
+            )
         }
 
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    singleLine = true,
-                    placeholder = { Text("Поиск") },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Search
-                    ),
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.images),
-                            contentDescription = "Search Icon"
-                        )
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                )
+        Text(
+            text = "Статистика",
+            fontSize = 20.sp,
+            modifier = Modifier.constrainAs(screenTitleRef) {
+                top.linkTo(backBtnRef.bottom, margin = 16.dp)
+                centerHorizontallyTo(parent)
+            }
+        )
 
-                Box {
-                    Button(
-                        onClick = {
-                            focusManager.clearFocus()
-                            expandedSort = !expandedSort
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .height(56.dp)
-                    ) {
-                        Text(
-                            text = "Сортировка по статусу",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = expandedSort,
-                        onDismissRequest = { expandedSort = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Все") },
-                            onClick = {
-                                selectedSortStatus = "Все"
-                                expandedSort = false
-                            }
-                        )
-                        statusList.forEach { status ->
-                            DropdownMenuItem(
-                                text = { Text(status) },
-                                onClick = {
-                                    selectedSortStatus = status
-                                    expandedSort = false
-                                }
-                            )
-                        }
-                    }
+        Column(
+            modifier = Modifier
+                .constrainAs(controlsRef) {
+                    top.linkTo(screenTitleRef.bottom, margin = 16.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row {
+                Button(
+                    onClick = {
+                        // Загрузим в порядке убывания
+                        viewModel.handleIntent(RequestIntent.LoadRequestsSortedByDateDesc)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00))
+                ) {
+                    Text("По дате DESC", color = Color.White)
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        // В порядке возрастания
+                        viewModel.handleIntent(RequestIntent.LoadRequestsSortedByDateAsc)
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00))
+                ) {
+                    Text("По дате ASC", color = Color.White)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextField(
+                    value = yearQuery,
+                    onValueChange = { yearQuery = it },
+                    singleLine = true,
+                    label = { Text("Поиск по году (yyyy)") },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        focusManager.clearFocus()
+                        viewModel.handleIntent(RequestIntent.LoadRequestsByYear(yearQuery))
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00))
+                ) {
+                    Text("Фильтр по году", color = Color.White)
+                }
+            }
         }
 
-        items(filteredRequests) { request ->
-            RequestRowStatistics(request)
+        LazyColumn(
+            modifier = Modifier
+                .constrainAs(listRef) {
+                    top.linkTo(controlsRef.bottom, margin = 16.dp)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+        ) {
+            items(allRequests) { request ->
+                StatsRequestRow(request)
+            }
         }
     }
 }
 
 @Composable
-fun RequestRowStatistics(request: RequestItem) {
-    Row(
+fun StatsRequestRow(request: RequestItem) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 8.dp)
     ) {
-        Text(
-            text = "ID: ${request.id}",
-            fontSize = 14.sp,
-            color = Color.Black
-        )
-        Text(
-            text = request.description,
-            fontSize = 14.sp,
-            color = Color.Black
-        )
-        Text(
-            text = request.status,
-            fontSize = 14.sp,
-            color = Color.Black
-        )
+        Text("ID: ${request.id}")
+        Text("Дата: ${request.dateOfRegistration}")
+        Text("Адрес: ${request.address}")
+        Text("Статус: ${request.status}")
+        Spacer(modifier = Modifier.height(4.dp))
+        Divider()
     }
-    Divider(color = Color.LightGray)
 }
 
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp")

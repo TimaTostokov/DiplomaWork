@@ -1,5 +1,6 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,15 +20,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
+import com.kvork_app.diplomawork.model.dto.RequestItem
+import com.kvork_app.diplomawork.utils.RequestIntent
+import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddRequestScreen(
+    viewModel: RequestViewModel = viewModel(),
     onBackClick: () -> Unit,
     onSubmit: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    var customId by remember { mutableStateOf("") }
 
     var dateOfRegistration by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
@@ -35,8 +41,24 @@ fun AddRequestScreen(
     var description by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
     var masterFio by remember { mutableStateOf("") }
+
     val statusOptions = listOf("зарегистрирована", "в работе", "выполнено", "снята")
     var expanded by remember { mutableStateOf(false) }
+
+    val uiState by viewModel.state.collectAsState()
+
+    if (uiState.success) {
+        onSubmit()
+    }
+
+    uiState.errorMessage?.let { errorMsg ->
+        Log.e("AddRequestScreen", "Ошибка сохранения: $errorMsg")
+    }
+
+    // Можно отобразить индикатор загрузки
+    if (uiState.isLoading) {
+        // Напр. Simple CircularProgressIndicator или Box со скелетоном
+    }
 
     ConstraintLayout(
         modifier = Modifier
@@ -130,10 +152,23 @@ fun AddRequestScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                textFieldRow(stringResource(R.string.date_of_registration), dateOfRegistration) { dateOfRegistration = it }
-                textFieldRow(stringResource(R.string.address), address) { address = it }
-                textFieldRow(stringResource(R.string.contact_applicant), contact) { contact = it }
-                textFieldRow(stringResource(R.string.description), description) { description = it }
+                // Поле для ID (необязательно)
+                textFieldRow("ID заявки:", customId) {
+                    customId = it
+                }
+
+                textFieldRow(stringResource(R.string.date_of_registration), dateOfRegistration) {
+                    dateOfRegistration = it
+                }
+                textFieldRow(stringResource(R.string.address), address) {
+                    address = it
+                }
+                textFieldRow(stringResource(R.string.contact_applicant), contact) {
+                    contact = it
+                }
+                textFieldRow(stringResource(R.string.description), description) {
+                    description = it
+                }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
@@ -142,23 +177,14 @@ fun AddRequestScreen(
                         modifier = Modifier.width(150.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded },
-                        modifier = Modifier.width(200.dp)
-                    ) {
-                        TextField(
-                            value = status,
-                            onValueChange = {},
-                            readOnly = true,
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                            },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors()
-                        )
-                        ExposedDropdownMenu(
+                    Box(modifier = Modifier.wrapContentSize()) {
+                        Button(
+                            onClick = { expanded = true },
+                            modifier = Modifier.width(200.dp),
+                        ) {
+                            Text(text = if (status.isEmpty()) "Выберите статус" else status)
+                        }
+                        DropdownMenu(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }
                         ) {
@@ -177,14 +203,25 @@ fun AddRequestScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                textFieldRow(stringResource(R.string.master_fio), masterFio) { masterFio = it }
+                textFieldRow(stringResource(R.string.master_fio), masterFio) {
+                    masterFio = it
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
                     onClick = {
                         focusManager.clearFocus()
-                        onSubmit()
+                        val request = RequestItem(
+                            id = customId, // поле id
+                            dateOfRegistration = dateOfRegistration,
+                            address = address,
+                            contact = contact,
+                            description = description,
+                            status = status,
+                            masterFio = masterFio
+                        )
+                        viewModel.handleIntent(RequestIntent.SaveRequest(request))
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -199,8 +236,7 @@ fun AddRequestScreen(
     }
 }
 
-@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
-@Preview(showBackground = true, device = "spec:width=1280dp,height=800dp")
+@Preview(showBackground = true)
 @Composable
 fun AddRequestScreenPreview() {
     AddRequestScreen(
