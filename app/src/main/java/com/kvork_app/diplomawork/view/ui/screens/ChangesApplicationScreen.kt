@@ -1,8 +1,6 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
-import android.util.Log
-import com.kvork_app.diplomawork.intent.RequestIntent
-
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,19 +19,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
+import com.kvork_app.diplomawork.intent.RequestIntent
 import com.kvork_app.diplomawork.model.dto.RequestItem
 import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import com.kvork_app.diplomawork.view.ui.theme.DateVisualTransformation
 
 @Composable
 fun ChangesApplicationScreen(
@@ -41,14 +44,19 @@ fun ChangesApplicationScreen(
     onBackClick: () -> Unit,
     onUpdate: () -> Unit
 ) {
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     var requestId by remember { mutableStateOf("") }
-
-    var dateOfRegistration by remember { mutableStateOf("") }
+    var dateOfRegistrationRaw by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var contact by remember { mutableStateOf("") }
+    var contactRaw by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf("") }
+    var masterFio by remember { mutableStateOf("") }
 
+    var workType by remember { mutableStateOf("") }
+    var customWorkType by remember { mutableStateOf("") }
     val workTypeOptions = listOf(
         "Регулировка БВД",
         "Регулировка БУД",
@@ -86,8 +94,6 @@ fun ChangesApplicationScreen(
         "Иное"
     )
     var expandedWorkType by remember { mutableStateOf(false) }
-    var workType by remember { mutableStateOf("") }
-    var customWorkType by remember { mutableStateOf("") }
 
     val materialOptions = listOf(
         "Бвд 431 dxcvb",
@@ -124,24 +130,31 @@ fun ChangesApplicationScreen(
         "Тяга доводчика",
         "Контактор ключей"
     )
-
     var expandedMaterials by remember { mutableStateOf(false) }
     var selectedMaterials by remember { mutableStateOf(listOf<String>()) }
 
     val statusOptions = listOf("зарегистрирована", "в работе", "выполнено", "снята")
     var expandedStatus by remember { mutableStateOf(false) }
-    var status by remember { mutableStateOf("") }
 
-    var masterFio by remember { mutableStateOf("") }
+    val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
+    val formattedContact = "+" + contactRaw
+
+    val isFormValid = formattedDate.length == 10 &&
+            address.isNotBlank() &&
+            formattedContact.length > 1 &&
+            masterFio.isNotBlank() &&
+            workType.isNotBlank() &&
+            (workType != "Иное" || customWorkType.isNotBlank())
 
     val uiState by viewModel.state.collectAsState()
 
     if (uiState.success) {
         onUpdate()
+        viewModel.clearSuccess()
     }
 
     uiState.errorMessage?.let { errorMsg ->
-        Log.e("ChangesScreen", "Ошибка обновления: $errorMsg")
+        Toast.makeText(context, "Error update", Toast.LENGTH_SHORT).show()
     }
 
     ConstraintLayout(
@@ -178,7 +191,6 @@ fun ChangesApplicationScreen(
             text = stringResource(R.string.app_title),
             fontSize = 28.sp,
             color = Color(0xFF00AA00),
-            fontWeight = FontWeight.Bold,
             modifier = Modifier.constrainAs(titleRef) {
                 top.linkTo(parent.top, margin = 16.dp)
                 start.linkTo(logoRef.end, margin = 12.dp)
@@ -188,7 +200,6 @@ fun ChangesApplicationScreen(
         Text(
             text = stringResource(R.string.app_subtitle),
             fontSize = 16.sp,
-            color = Color.Black,
             modifier = Modifier.constrainAs(subtitleRef) {
                 top.linkTo(titleRef.bottom, margin = 4.dp)
                 start.linkTo(titleRef.start)
@@ -198,8 +209,6 @@ fun ChangesApplicationScreen(
         Text(
             text = "Изменение заявки",
             fontSize = 20.sp,
-            color = Color.Black,
-            fontWeight = FontWeight.SemiBold,
             modifier = Modifier.constrainAs(screenTitleRef) {
                 top.linkTo(logoRef.bottom, margin = 32.dp)
                 centerHorizontallyTo(parent)
@@ -214,53 +223,85 @@ fun ChangesApplicationScreen(
                 }
                 .fillMaxWidth()
         ) {
-            Column(horizontalAlignment = Alignment.Start) {
-
+            Column {
                 @Composable
-                fun textFieldRow(label: String, value: String, onValueChange: (String) -> Unit) {
+                fun textFieldRow(
+                    label: String,
+                    value: String,
+                    onValueChange: (String) -> Unit,
+                    keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    visualTransformation: VisualTransformation = VisualTransformation.None
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = label,
-                            fontSize = 16.sp,
-                            modifier = Modifier.width(150.dp)
-                        )
+                        Text(text = label, modifier = Modifier.width(150.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         TextField(
                             value = value,
                             onValueChange = onValueChange,
-                            modifier = Modifier.width(200.dp),
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
+                            keyboardOptions = keyboardOptions,
+                            visualTransformation = visualTransformation,
+                            modifier = Modifier.width(200.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                textFieldRow("ID заявки:", requestId) { requestId = it }
-                textFieldRow("Дата регистрации:", dateOfRegistration) { dateOfRegistration = it }
-                textFieldRow("Адрес:", address) { address = it }
-                textFieldRow("Контакт заявителя:", contact) { contact = it }
+                textFieldRow(
+                    label = "ID заявки:",
+                    value = requestId,
+                    onValueChange = { newValue ->
+                        requestId = newValue.filter { it.isDigit() }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    )
+                )
+
+                textFieldRow(
+                    label = stringResource(R.string.date_of_registration),
+                    value = dateOfRegistrationRaw,
+                    onValueChange = { newValue ->
+                        dateOfRegistrationRaw = newValue.filter { it.isDigit() }.take(8)
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    visualTransformation = DateVisualTransformation()
+                )
+
+                textFieldRow(
+                    label = stringResource(R.string.address),
+                    value = address,
+                    onValueChange = { address = it }
+                )
+
+                textFieldRow(
+                    label = stringResource(R.string.contact_applicant),
+                    value = formattedContact,
+                    onValueChange = { newValue ->
+                        val digits = newValue.filter { it.isDigit() }
+                        contactRaw = digits
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    )
+                )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Тип проведенных работ:",
-                        fontSize = 16.sp,
-                        modifier = Modifier.width(150.dp)
-                    )
+                    Text(text = "Тип работ:", modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.wrapContentSize()) {
-                        Button(
-                            onClick = { expandedWorkType = true },
-                            modifier = Modifier.width(200.dp)
-                        ) {
+                        Button(onClick = { expandedWorkType = true }, modifier = Modifier.width(200.dp)) {
                             Text(text = if (workType.isEmpty()) "Выберите тип" else workType)
                         }
                         DropdownMenu(
                             expanded = expandedWorkType,
                             onDismissRequest = { expandedWorkType = false },
-                            modifier = Modifier
-                                .width(200.dp)
-                                .padding(horizontal = 8.dp)
+                            modifier = Modifier.width(200.dp)
                         ) {
                             workTypeOptions.forEach { option ->
                                 DropdownMenuItem(
@@ -275,37 +316,21 @@ fun ChangesApplicationScreen(
                     }
                 }
                 if (workType == "Иное") {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextField(
+                    textFieldRow(
+                        label = "Введите тип:",
                         value = customWorkType,
-                        onValueChange = { customWorkType = it },
-                        placeholder = { Text("Введите иной тип") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 150.dp)
+                        onValueChange = { customWorkType = it }
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                } else {
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Материалы:",
-                        fontSize = 16.sp,
-                        modifier = Modifier.width(150.dp)
-                    )
+                    Text(text = "Материалы:", modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.wrapContentSize()) {
-                        Button(
-                            onClick = { expandedMaterials = true },
-                            modifier = Modifier.width(200.dp)
-                        ) {
+                        Button(onClick = { expandedMaterials = true }, modifier = Modifier.width(200.dp)) {
                             Text(
-                                text = if (selectedMaterials.isEmpty())
-                                    "Выберите материалы"
-                                else
-                                    selectedMaterials.joinToString(", ")
+                                text = if (selectedMaterials.isEmpty()) "Выберите материалы" else selectedMaterials.joinToString(", ")
                             )
                         }
                         DropdownMenu(
@@ -350,25 +375,16 @@ fun ChangesApplicationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Статус:",
-                        fontSize = 16.sp,
-                        modifier = Modifier.width(150.dp)
-                    )
+                    Text(text = stringResource(R.string.status), modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.wrapContentSize()) {
-                        Button(
-                            onClick = { expandedStatus = true },
-                            modifier = Modifier.width(200.dp)
-                        ) {
+                        Button(onClick = { expandedStatus = true }, modifier = Modifier.width(200.dp)) {
                             Text(text = if (status.isEmpty()) "Выберите статус" else status)
                         }
                         DropdownMenu(
                             expanded = expandedStatus,
                             onDismissRequest = { expandedStatus = false },
-                            modifier = Modifier
-                                .width(200.dp)
-                                .padding(horizontal = 8.dp)
+                            modifier = Modifier.width(200.dp)
                         ) {
                             statusOptions.forEach { option ->
                                 DropdownMenuItem(
@@ -384,44 +400,52 @@ fun ChangesApplicationScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                textFieldRow("ФИО мастера:", masterFio) { masterFio = it }
-
+                textFieldRow(
+                    label = stringResource(R.string.master_fio),
+                    value = masterFio,
+                    onValueChange = { masterFio = it.filter { ch -> ch.isLetter() || ch.isWhitespace() } }
+                )
                 Spacer(modifier = Modifier.height(24.dp))
-
                 Button(
                     onClick = {
-                        focusManager.clearFocus()
-                        val newData = RequestItem(
-                            id = requestId,
-                            dateOfRegistration = dateOfRegistration,
-                            address = address,
-                            contact = contact,
-                            status = status,
-                            masterFio = masterFio
-                        )
-                        viewModel.handleIntent(
-                            RequestIntent.UpdateRequest(id = requestId, newData = newData)
-                        )
+                        if (!isFormValid) {
+                            Toast.makeText(
+                                context,
+                                "Пожалуйста, заполните все поля корректно",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            focusManager.clearFocus()
+                            val finalWorkType = if (workType == "Иное") customWorkType else workType
+                            val updatedRequest = RequestItem(
+                                id = requestId,
+                                dateOfRegistration = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text.toString(),
+                                address = address,
+                                contact = formattedContact,
+                                description = description,
+                                status = status,
+                                masterFio = masterFio,
+                                typeOfWork = finalWorkType,
+                                materials = selectedMaterials
+                            )
+                            viewModel.handleIntent(RequestIntent.UpdateRequest(id = requestId, newData = updatedRequest))
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(
-                        text = "ИЗМЕНИТЬ",
-                        color = Color.White
-                    )
+                    Text(text = "ИЗМЕНИТЬ", color = Color.White)
                 }
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun ChangesApplicationScreenPreview() {
     ChangesApplicationScreen(
         onBackClick = {},
         onUpdate = {}
     )
-
 }

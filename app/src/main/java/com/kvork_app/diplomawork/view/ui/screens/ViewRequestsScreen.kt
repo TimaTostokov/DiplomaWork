@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -33,9 +34,12 @@ fun ViewRequestsScreen(
     onBackClick: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val isInPreview = LocalInspectionMode.current
 
     LaunchedEffect(Unit) {
-        viewModel.handleIntent(RequestIntent.LoadAllRequests)
+        if (!isInPreview) {
+            viewModel.handleIntent(RequestIntent.LoadAllRequests)
+        }
     }
 
     val uiState by viewModel.state.collectAsState()
@@ -237,8 +241,8 @@ fun RequestRow(request: RequestItem) {
     Divider(color = Color.LightGray)
 }
 
-@Preview(showBackground = true, device = "spec:width=411dp,height=891dp")
-@Preview(showBackground = true, device = "spec:width=1280dp,height=800dp")
+@Preview( showBackground = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
+@Preview( showBackground = true, device = "spec:width=1280dp,height=800dp", apiLevel = 34)
 @Composable
 fun ViewRequestsScreenPreview() {
     ViewRequestsScreen(onBackClick = {})

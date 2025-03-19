@@ -17,6 +17,10 @@ class RequestViewModel(
     private val _state = MutableStateFlow(RequestState())
     val state: StateFlow<RequestState> = _state
 
+    fun clearSuccess() {
+        _state.value = _state.value.copy(success = false)
+    }
+
     fun handleIntent(intent: RequestIntent) {
         when (intent) {
             is RequestIntent.SaveRequest -> {
@@ -43,7 +47,11 @@ class RequestViewModel(
     private fun saveRequest(request: RequestItem) {
         _state.value = _state.value.copy(isLoading = true, success = false, errorMessage = null)
         viewModelScope.launch {
-            val resultId = repository.addRequest(request)
+            val requests = repository.getAllRequests()
+            val maxId = requests.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0
+            val newId = (maxId + 1).toString()
+            val requestToSave = request.copy(id = newId)
+            val resultId = repository.addRequest(requestToSave)
             if (resultId != null) {
                 _state.value = _state.value.copy(
                     isLoading = false,
@@ -130,5 +138,4 @@ class RequestViewModel(
             )
         }
     }
-
 }

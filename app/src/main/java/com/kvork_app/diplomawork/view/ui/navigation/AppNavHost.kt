@@ -44,14 +44,14 @@ fun AppNavHost(navController: NavHostController) {
         composable(Screen.AddRequest.route) {
             AddRequestScreen(
                 onBackClick = { navController.popBackStack() },
-                onSubmit = { navController.popBackStack() }
+                onSubmit = { navController.navigate(Screen.Main.route)}
             )
         }
 
         composable(Screen.EditRequest.route) {
             ChangesApplicationScreen(
                 onBackClick = { navController.popBackStack() },
-                onUpdate = { navController.popBackStack() }
+                onUpdate = { navController.navigate(Screen.Main.route) }
             )
         }
         composable(Screen.ViewRequest.route) {

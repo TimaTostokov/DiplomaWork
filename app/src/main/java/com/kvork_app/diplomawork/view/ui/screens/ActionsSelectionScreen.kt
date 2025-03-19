@@ -1,6 +1,6 @@
 package com.kvork_app.diplomawork.view.ui.screens
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,21 +10,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
-import com.kvork_app.diplomawork.model.dto.RequestItem
 import com.kvork_app.diplomawork.intent.RequestIntent
+import com.kvork_app.diplomawork.model.dto.RequestItem
 import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import com.kvork_app.diplomawork.view.ui.theme.DateVisualTransformation
 
 @Composable
 fun AddRequestScreen(
@@ -32,27 +35,39 @@ fun AddRequestScreen(
     onBackClick: () -> Unit,
     onSubmit: () -> Unit
 ) {
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    var customId by remember { mutableStateOf("") }
 
-    var dateOfRegistration by remember { mutableStateOf("") }
+    var dateOfRegistrationRaw by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var contact by remember { mutableStateOf("") }
+    var contactRaw by remember { mutableStateOf("") } // ввод без знака "+"
     var description by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
     var masterFio by remember { mutableStateOf("") }
 
+    val contact = "+" + contactRaw
+
     val statusOptions = listOf("зарегистрирована", "в работе", "выполнено", "снята")
     var expanded by remember { mutableStateOf(false) }
+
+    val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
+
+    val isFormValid = formattedDate.length == 10 &&
+            address.isNotBlank() &&
+            contact.length > 1 &&
+            description.isNotBlank() &&
+            status.isNotBlank() &&
+            masterFio.isNotBlank()
 
     val uiState by viewModel.state.collectAsState()
 
     if (uiState.success) {
         onSubmit()
+        viewModel.clearSuccess()
     }
 
     uiState.errorMessage?.let { errorMsg ->
-        Log.e("AddRequestScreen", "Ошибка сохранения: $errorMsg")
+        Toast.makeText(context, "Error add", Toast.LENGTH_SHORT).show()
     }
 
     ConstraintLayout(
@@ -88,8 +103,7 @@ fun AddRequestScreen(
         Text(
             text = stringResource(R.string.app_title),
             fontSize = 28.sp,
-            color = Color(0xFF00AA00),
-            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.constrainAs(titleRef) {
                 top.linkTo(parent.top, margin = 16.dp)
                 start.linkTo(logoRef.end, margin = 12.dp)
@@ -99,7 +113,6 @@ fun AddRequestScreen(
         Text(
             text = stringResource(R.string.app_subtitle),
             fontSize = 16.sp,
-            color = Color.Black,
             modifier = Modifier.constrainAs(subtitleRef) {
                 top.linkTo(titleRef.bottom, margin = 4.dp)
                 start.linkTo(titleRef.start)
@@ -109,8 +122,6 @@ fun AddRequestScreen(
         Text(
             text = stringResource(R.string.add_request),
             fontSize = 20.sp,
-            color = Color.Black,
-            fontWeight = FontWeight.SemiBold,
             modifier = Modifier.constrainAs(screenTitleRef) {
                 top.linkTo(logoRef.bottom, margin = 32.dp)
                 centerHorizontallyTo(parent)
@@ -125,56 +136,75 @@ fun AddRequestScreen(
                 }
                 .fillMaxWidth()
         ) {
-            Column(horizontalAlignment = Alignment.Start) {
-
+            Column {
                 @Composable
-                fun textFieldRow(label: String, value: String, onValueChange: (String) -> Unit) {
+                fun textFieldRow(
+                    label: String,
+                    value: String,
+                    onValueChange: (String) -> Unit,
+                    keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    visualTransformation: VisualTransformation = VisualTransformation.None
+                ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = label,
-                            fontSize = 16.sp,
-                            modifier = Modifier.width(150.dp)
-                        )
+                        Text(text = label, modifier = Modifier.width(150.dp))
                         Spacer(modifier = Modifier.width(8.dp))
                         TextField(
                             value = value,
                             onValueChange = onValueChange,
-                            modifier = Modifier.width(200.dp),
                             singleLine = true,
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
+                            keyboardOptions = keyboardOptions,
+                            visualTransformation = visualTransformation,
+                            modifier = Modifier.width(200.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                textFieldRow("ID заявки:", customId) {
-                    customId = it
-                }
+                textFieldRow(
+                    label = stringResource(R.string.date_of_registration),
+                    value = dateOfRegistrationRaw,
+                    onValueChange = { newValue ->
+                        dateOfRegistrationRaw = newValue.filter { it.isDigit() }.take(8)
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    visualTransformation = DateVisualTransformation()
+                )
 
-                textFieldRow(stringResource(R.string.date_of_registration), dateOfRegistration) {
-                    dateOfRegistration = it
-                }
-                textFieldRow(stringResource(R.string.address), address) {
-                    address = it
-                }
-                textFieldRow(stringResource(R.string.contact_applicant), contact) {
-                    contact = it
-                }
-                textFieldRow(stringResource(R.string.description), description) {
-                    description = it
-                }
+                textFieldRow(
+                    label = stringResource(R.string.address),
+                    value = address,
+                    onValueChange = { address = it }
+                )
+
+                textFieldRow(
+                    label = stringResource(R.string.contact_applicant),
+                    value = contact,
+                    onValueChange = { newValue ->
+                        val digits = newValue.filter { it.isDigit() }
+                        contactRaw = digits
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    )
+                )
+
+                textFieldRow(
+                    label = stringResource(R.string.description),
+                    value = description,
+                    onValueChange = { description = it }
+                )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.status),
-                        fontSize = 16.sp,
-                        modifier = Modifier.width(150.dp)
-                    )
+                    Text(text = stringResource(R.string.status), modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Box(modifier = Modifier.wrapContentSize()) {
+                    Box {
                         Button(
                             onClick = { expanded = true },
-                            modifier = Modifier.width(200.dp),
+                            modifier = Modifier.width(200.dp)
                         ) {
                             Text(text = if (status.isEmpty()) "Выберите статус" else status)
                         }
@@ -194,35 +224,41 @@ fun AddRequestScreen(
                         }
                     }
                 }
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                textFieldRow(stringResource(R.string.master_fio), masterFio) {
-                    masterFio = it
-                }
-
+                textFieldRow(
+                    label = stringResource(R.string.master_fio),
+                    value = masterFio,
+                    onValueChange = { masterFio = it.filter { ch -> ch.isLetter() || ch.isWhitespace() } }
+                )
                 Spacer(modifier = Modifier.height(24.dp))
-
                 Button(
                     onClick = {
-                        focusManager.clearFocus()
-                        val request = RequestItem(
-                            id = customId,
-                            dateOfRegistration = dateOfRegistration,
-                            address = address,
-                            contact = contact,
-                            description = description,
-                            status = status,
-                            masterFio = masterFio
-                        )
-                        viewModel.handleIntent(RequestIntent.SaveRequest(request))
+                        if (!isFormValid) {
+                            Toast.makeText(
+                                context,
+                                "Пожалуйста, заполните все поля корректно",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            focusManager.clearFocus()
+                            val request = RequestItem(
+                                id = "",
+                                dateOfRegistration = formattedDate.toString(),
+                                address = address,
+                                contact = contact,
+                                description = description,
+                                status = status,
+                                masterFio = masterFio
+                            )
+                            viewModel.handleIntent(RequestIntent.SaveRequest(request))
+                        }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
                     Text(
                         text = stringResource(R.string.submit_button),
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -237,5 +273,4 @@ fun AddRequestScreenPreview() {
         onBackClick = {},
         onSubmit = {}
     )
-
 }
