@@ -301,7 +301,9 @@ fun ChangesApplicationScreen(
                         DropdownMenu(
                             expanded = expandedWorkType,
                             onDismissRequest = { expandedWorkType = false },
-                            modifier = Modifier.width(200.dp)
+                            modifier = Modifier
+                                .height(600.dp)
+                                .width(200.dp)
                         ) {
                             workTypeOptions.forEach { option ->
                                 DropdownMenuItem(
@@ -337,6 +339,7 @@ fun ChangesApplicationScreen(
                             expanded = expandedMaterials,
                             onDismissRequest = { expandedMaterials = false },
                             modifier = Modifier
+                                .height(600.dp)
                                 .width(200.dp)
                                 .padding(horizontal = 8.dp)
                         ) {
