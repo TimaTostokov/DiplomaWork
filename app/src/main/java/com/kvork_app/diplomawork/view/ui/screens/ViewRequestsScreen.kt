@@ -24,7 +24,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
 import com.kvork_app.diplomawork.model.dto.RequestItem
-import com.kvork_app.diplomawork.utils.RequestIntent
+import com.kvork_app.diplomawork.intent.RequestIntent
 import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
@@ -34,7 +34,6 @@ fun ViewRequestsScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
-    // При первом показе экрана — загрузим все заявки
     LaunchedEffect(Unit) {
         viewModel.handleIntent(RequestIntent.LoadAllRequests)
     }
@@ -47,14 +46,12 @@ fun ViewRequestsScreen(
 
     val allRequests = uiState.requests
 
-    // Локальный поиск и сортировка
     var searchQuery by remember { mutableStateOf("") }
 
     val statusList = listOf("Все", "зарегана", "в работе", "выполнено", "снята")
     var expandedSort by remember { mutableStateOf(false) }
     var selectedSortStatus by remember { mutableStateOf("Все") }
 
-    // Фильтруем из общего списка
     val filteredRequests = allRequests.filter { request ->
         val statusMatch = if (selectedSortStatus == "Все") true
         else request.status.equals(selectedSortStatus, ignoreCase = true)

@@ -12,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +27,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
 import com.kvork_app.diplomawork.model.dto.RequestItem
-import com.kvork_app.diplomawork.utils.RequestIntent
+import com.kvork_app.diplomawork.intent.RequestIntent
 import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
@@ -38,7 +37,6 @@ fun StatisticsScreen(
 ) {
     val focusManager = LocalFocusManager.current
 
-    // При заходе на экран — загрузим все заявки
     LaunchedEffect(Unit) {
         viewModel.handleIntent(RequestIntent.LoadAllRequests)
     }
@@ -50,7 +48,6 @@ fun StatisticsScreen(
         Log.e("StatisticsScreen", "Ошибка: $errorMsg")
     }
 
-    // Здесь вы можете реализовать любую фильтрацию (материалы, адрес, год и т.д.)
     var yearQuery by remember { mutableStateOf("") }
 
     ConstraintLayout(
@@ -74,7 +71,7 @@ fun StatisticsScreen(
         }
 
         Text(
-            text = "Статистика",
+            text = "Статистика по материалам",
             fontSize = 20.sp,
             modifier = Modifier.constrainAs(screenTitleRef) {
                 top.linkTo(backBtnRef.bottom, margin = 16.dp)
@@ -94,7 +91,6 @@ fun StatisticsScreen(
             Row {
                 Button(
                     onClick = {
-                        // Загрузим в порядке убывания
                         viewModel.handleIntent(RequestIntent.LoadRequestsSortedByDateDesc)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00))
@@ -104,7 +100,6 @@ fun StatisticsScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = {
-                        // В порядке возрастания
                         viewModel.handleIntent(RequestIntent.LoadRequestsSortedByDateAsc)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00))
@@ -119,7 +114,7 @@ fun StatisticsScreen(
                     value = yearQuery,
                     onValueChange = { yearQuery = it },
                     singleLine = true,
-                    label = { Text("Поиск по году (yyyy)") },
+                    label = { Text("Поиск по году (дате)") },
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
                 )
                 Spacer(modifier = Modifier.width(8.dp))

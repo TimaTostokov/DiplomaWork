@@ -6,6 +6,8 @@ data class RequestItem(
     val address: String = "",
     val contact: String = "",
     val description: String = "",
+    val typeOfWork: String = "",
+    val materials: List<String> = emptyList(),
     val status: String = "",
     val masterFio: String = ""
 )

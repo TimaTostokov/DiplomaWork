@@ -23,7 +23,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
 import com.kvork_app.diplomawork.model.dto.RequestItem
-import com.kvork_app.diplomawork.utils.RequestIntent
+import com.kvork_app.diplomawork.intent.RequestIntent
 import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
@@ -53,11 +53,6 @@ fun AddRequestScreen(
 
     uiState.errorMessage?.let { errorMsg ->
         Log.e("AddRequestScreen", "Ошибка сохранения: $errorMsg")
-    }
-
-    // Можно отобразить индикатор загрузки
-    if (uiState.isLoading) {
-        // Напр. Simple CircularProgressIndicator или Box со скелетоном
     }
 
     ConstraintLayout(
@@ -152,7 +147,6 @@ fun AddRequestScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                 }
 
-                // Поле для ID (необязательно)
                 textFieldRow("ID заявки:", customId) {
                     customId = it
                 }
@@ -213,7 +207,7 @@ fun AddRequestScreen(
                     onClick = {
                         focusManager.clearFocus()
                         val request = RequestItem(
-                            id = customId, // поле id
+                            id = customId,
                             dateOfRegistration = dateOfRegistration,
                             address = address,
                             contact = contact,
@@ -243,4 +237,5 @@ fun AddRequestScreenPreview() {
         onBackClick = {},
         onSubmit = {}
     )
+
 }

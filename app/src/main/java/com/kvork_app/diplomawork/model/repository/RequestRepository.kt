@@ -12,7 +12,6 @@ class RequestRepository {
     private val db = FirebaseFirestore.getInstance()
     private val collectionName = "requests"
 
-
     suspend fun addRequest(request: RequestItem): String? {
         return try {
             if (request.id.isNotEmpty()) {
@@ -84,4 +83,5 @@ class RequestRepository {
             emptyList()
         }
     }
+
 }

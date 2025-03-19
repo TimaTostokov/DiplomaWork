@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kvork_app.diplomawork.model.dto.RequestItem
 import com.kvork_app.diplomawork.model.repository.RequestRepository
-import com.kvork_app.diplomawork.utils.RequestIntent
-import com.kvork_app.diplomawork.utils.RequestState
+import com.kvork_app.diplomawork.intent.RequestIntent
+import com.kvork_app.diplomawork.intent.RequestState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -130,4 +130,5 @@ class RequestViewModel(
             )
         }
     }
+
 }
