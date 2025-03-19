@@ -40,7 +40,7 @@ fun AddRequestScreen(
 
     var dateOfRegistrationRaw by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var contactRaw by remember { mutableStateOf("") } // ввод без знака "+"
+    var contactRaw by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
     var masterFio by remember { mutableStateOf("") }

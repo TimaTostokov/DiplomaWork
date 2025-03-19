@@ -51,11 +51,9 @@ fun AddressStatsScreen(
         it.address.contains(searchQuery, ignoreCase = true)
     }
 
-    // Используем LazyColumn с stickyHeader, чтобы заголовок таблицы всегда оставался наверху
     val listState = rememberLazyListState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Верхняя часть: панель с кнопкой, логотипом и заголовками
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,7 +94,6 @@ fun AddressStatsScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
-        // Поисковая строка
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,7 +111,7 @@ fun AddressStatsScreen(
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(onClick = { focusManager.clearFocus() }) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_back),
+                    painter = painterResource(R.drawable.ic_search_go),
                     contentDescription = "Иконка поиска"
                 )
             }

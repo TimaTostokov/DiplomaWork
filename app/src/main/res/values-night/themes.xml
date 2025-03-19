@@ -19,7 +19,7 @@
 
     <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/green</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_app</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_ai</item>
         <item name="postSplashScreenTheme">@style/Base.Theme.DiplomaWork</item>
     </style>
 

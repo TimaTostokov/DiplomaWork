@@ -2,6 +2,7 @@ package com.kvork_app.diplomawork.view.ui.screens
 
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -57,15 +58,34 @@ fun StatisticsScreen(
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
+            Image(
+                painter = painterResource(id = R.drawable.ic_logo),
+                contentDescription = stringResource(id = R.string.logo_description),
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Column {
+                Text(
+                    text = stringResource(id = R.string.app_title),
+                    fontSize = 28.sp,
+                    color = Color(0xFF00AA00)
+                )
+                Text(
+                    text = stringResource(id = R.string.app_subtitle),
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+            }
+        }
 
             Text(
                 text = "Статистика по материалам",
                 fontSize = 20.sp,
                 modifier = Modifier.weight(1f)
             )
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
+
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(
                 value = yearQuery,
@@ -73,7 +93,13 @@ fun StatisticsScreen(
                 label = { Text("Поиск по году (дате)") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_search_go),
+                        contentDescription = "Поиск"
+                    )
+                }
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
@@ -100,7 +126,7 @@ fun StatisticsScreen(
         ) {
             stickyHeader {
                 Text(
-                    text = "таблица со всеми данными по заявкам и адресам",
+                    text = "таблица с материалами и адресами",
                     fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()
