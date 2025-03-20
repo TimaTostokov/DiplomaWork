@@ -18,6 +18,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -25,9 +26,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
 import com.kvork_app.diplomawork.intent.RequestIntent
 import com.kvork_app.diplomawork.model.dto.RequestItem
-import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
-import androidx.compose.ui.tooling.preview.Preview
 import com.kvork_app.diplomawork.view.ui.theme.DateVisualTransformation
+import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
 fun AddRequestScreen(
@@ -40,21 +40,21 @@ fun AddRequestScreen(
 
     var dateOfRegistrationRaw by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
-    var contactRaw by remember { mutableStateOf("") }
+
+    var contact by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var status by remember { mutableStateOf("") }
     var masterFio by remember { mutableStateOf("") }
 
-    val contact = "+$contactRaw"
-
     val statusOptions = listOf("Зарегистрирована", "В работе", "Выполнена", "Снята")
     var expanded by remember { mutableStateOf(false) }
 
-    val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
+    val formattedDate =
+        DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
 
     val isFormValid = formattedDate.length == 10 &&
             address.isNotBlank() &&
-            contact.length > 1 &&
+            contact.isNotBlank() &&
             description.isNotBlank() &&
             status.isNotBlank() &&
             masterFio.isNotBlank()
@@ -179,15 +179,13 @@ fun AddRequestScreen(
                     onValueChange = { address = it }
                 )
 
+
                 textFieldRow(
                     label = stringResource(R.string.contact_applicant),
                     value = contact,
-                    onValueChange = { newValue ->
-                        val digits = newValue.filter { it.isDigit() }
-                        contactRaw = digits
-                    },
+                    onValueChange = { newValue -> contact = newValue },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
+                        keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Next
                     )
                 )
@@ -228,7 +226,9 @@ fun AddRequestScreen(
                 textFieldRow(
                     label = stringResource(R.string.master_fio),
                     value = masterFio,
-                    onValueChange = { masterFio = it.filter { ch -> ch.isLetter() || ch.isWhitespace() } }
+                    onValueChange = {
+                        masterFio = it.filter { ch -> ch.isLetter() || ch.isWhitespace() }
+                    }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
                 Button(
@@ -273,4 +273,5 @@ fun AddRequestScreenPreview() {
         onBackClick = {},
         onSubmit = {}
     )
+
 }

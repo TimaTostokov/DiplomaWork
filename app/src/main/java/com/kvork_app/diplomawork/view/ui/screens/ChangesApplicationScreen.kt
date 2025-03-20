@@ -27,6 +27,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -34,9 +35,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kvork_app.diplomawork.R
 import com.kvork_app.diplomawork.intent.RequestIntent
 import com.kvork_app.diplomawork.model.dto.RequestItem
-import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
-import androidx.compose.ui.tooling.preview.Preview
 import com.kvork_app.diplomawork.view.ui.theme.DateVisualTransformation
+import com.kvork_app.diplomawork.view.viewmodels.RequestViewModel
 
 @Composable
 fun ChangesApplicationScreen(
@@ -136,12 +136,12 @@ fun ChangesApplicationScreen(
     val statusOptions = listOf("Зарегистрирована", "В работе", "Выполнена", "Снята")
     var expandedStatus by remember { mutableStateOf(false) }
 
-    val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
-    val formattedContact = "+$contactRaw"
+    val formattedDate = DateVisualTransformation()
+        .filter(AnnotatedString(dateOfRegistrationRaw)).text
 
     val isFormValid = formattedDate.length == 10 &&
             address.isNotBlank() &&
-            formattedContact.length > 1 &&
+            contactRaw.isNotBlank() &&
             masterFio.isNotBlank() &&
             workType.isNotBlank() &&
             (workType != "Иное" || customWorkType.isNotBlank())
@@ -152,7 +152,7 @@ fun ChangesApplicationScreen(
         uiState.currentRequest?.let { req ->
             dateOfRegistrationRaw = req.dateOfRegistration
             address = req.address
-            contactRaw = req.contact.removePrefix("+")
+            contactRaw = req.contact
             description = req.description
             status = req.status
             masterFio = req.masterFio
@@ -299,22 +299,19 @@ fun ChangesApplicationScreen(
 
                 textFieldRow(
                     label = stringResource(R.string.contact_applicant),
-                    value = formattedContact,
-                    onValueChange = { newValue ->
-                        val digits = newValue.filter { it.isDigit() }
-                        contactRaw = digits
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
-                    )
+                    value = contactRaw,
+                    onValueChange = { contactRaw = it },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
                 )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(text = "Тип работ:", modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.wrapContentSize()) {
-                        Button(onClick = { expandedWorkType = true }, modifier = Modifier.width(200.dp)) {
+                        Button(
+                            onClick = { expandedWorkType = true },
+                            modifier = Modifier.width(200.dp)
+                        ) {
                             Text(text = if (workType.isEmpty()) "Выберите тип" else workType)
                         }
                         DropdownMenu(
@@ -349,9 +346,13 @@ fun ChangesApplicationScreen(
                     Text(text = "Материалы:", modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.wrapContentSize()) {
-                        Button(onClick = { expandedMaterials = true }, modifier = Modifier.width(200.dp)) {
+                        Button(
+                            onClick = { expandedMaterials = true },
+                            modifier = Modifier.width(200.dp)
+                        ) {
                             Text(
-                                text = if (selectedMaterials.isEmpty()) "Выберите материалы" else selectedMaterials.joinToString(", ")
+                                text = if (selectedMaterials.isEmpty()) "Выберите материалы"
+                                else selectedMaterials.joinToString(", ")
                             )
                         }
                         DropdownMenu(
@@ -400,7 +401,10 @@ fun ChangesApplicationScreen(
                     Text(text = stringResource(R.string.status), modifier = Modifier.width(150.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(modifier = Modifier.wrapContentSize()) {
-                        Button(onClick = { expandedStatus = true }, modifier = Modifier.width(200.dp)) {
+                        Button(
+                            onClick = { expandedStatus = true },
+                            modifier = Modifier.width(200.dp)
+                        ) {
                             Text(text = if (status.isEmpty()) "Выберите статус" else status)
                         }
                         DropdownMenu(
@@ -425,9 +429,12 @@ fun ChangesApplicationScreen(
                 textFieldRow(
                     label = stringResource(R.string.master_fio),
                     value = masterFio,
-                    onValueChange = { masterFio = it.filter { ch -> ch.isLetter() || ch.isWhitespace() } }
+                    onValueChange = {
+                        masterFio = it.filter { ch -> ch.isLetter() || ch.isWhitespace() }
+                    }
                 )
                 Spacer(modifier = Modifier.height(24.dp))
+
                 Button(
                     onClick = {
                         if (!isFormValid) {
@@ -441,16 +448,23 @@ fun ChangesApplicationScreen(
                             val finalWorkType = if (workType == "Иное") customWorkType else workType
                             val updatedRequest = RequestItem(
                                 id = requestId,
-                                dateOfRegistration = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text.toString(),
+                                dateOfRegistration = DateVisualTransformation().filter(
+                                    AnnotatedString(dateOfRegistrationRaw)
+                                ).text.toString(),
                                 address = address,
-                                contact = formattedContact,
+                                contact = contactRaw,
                                 description = description,
                                 status = status,
                                 masterFio = masterFio,
                                 typeOfWork = finalWorkType,
                                 materials = selectedMaterials
                             )
-                            viewModel.handleIntent(RequestIntent.UpdateRequest(id = requestId, newData = updatedRequest))
+                            viewModel.handleIntent(
+                                RequestIntent.UpdateRequest(
+                                    id = requestId,
+                                    newData = updatedRequest
+                                )
+                            )
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
@@ -470,4 +484,5 @@ fun ChangesApplicationScreenPreview() {
         onBackClick = {},
         onUpdate = {}
     )
+
 }
