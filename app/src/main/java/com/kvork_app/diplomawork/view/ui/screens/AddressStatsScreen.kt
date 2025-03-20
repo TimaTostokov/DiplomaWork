@@ -123,7 +123,7 @@ fun AddressStatsScreen(
         ) {
             stickyHeader {
                 Text(
-                    text = "таблица со всеми данными по заявкам и адресам",
+                    text = "Таблица со всеми данными по заявкам и адресам",
                     fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()

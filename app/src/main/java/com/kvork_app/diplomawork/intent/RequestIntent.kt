@@ -9,4 +9,5 @@ sealed class RequestIntent {
     object LoadRequestsSortedByDateDesc : RequestIntent()
     object LoadRequestsSortedByDateAsc : RequestIntent()
     data class LoadRequestsByYear(val year: String) : RequestIntent()
+    data class LoadRequestsByMaterial(val material: String) : RequestIntent()
 }

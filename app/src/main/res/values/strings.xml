@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">DiplomaWork</string>
+    <string name="app_name">Учётышь</string>
 
-    <string name="app_title">УЧЁТЫШ</string>
+    <string name="app_title">Учётышь</string>
     <string name="app_subtitle">приложение по учёту заявок</string>
     <string name="choose_action">Выберите действие:</string>
     <string name="requests_action">Действия с заявками</string>

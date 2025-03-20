@@ -40,7 +40,15 @@ fun StatisticsScreen(
         Log.e("StatisticsScreen", "Ошибка: $errorMsg")
     }
 
-    var yearQuery by remember { mutableStateOf("") }
+    var materialQuery by remember { mutableStateOf("") }
+
+    LaunchedEffect(materialQuery) {
+        if (materialQuery.isNotBlank()) {
+            viewModel.handleIntent(RequestIntent.LoadRequestsByMaterial(materialQuery))
+        } else {
+            viewModel.handleIntent(RequestIntent.LoadAllRequests)
+        }
+    }
 
     val lazyListState = rememberLazyListState()
 
@@ -78,19 +86,19 @@ fun StatisticsScreen(
             }
         }
 
-            Text(
-                text = "Статистика по материалам",
-                fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
-            )
+        Text(
+            text = "Статистика по материалам",
+            fontSize = 20.sp,
+            modifier = Modifier.weight(1f)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(
-                value = yearQuery,
-                onValueChange = { yearQuery = it },
-                label = { Text("Поиск по году (дате)") },
+                value = materialQuery,
+                onValueChange = { materialQuery = it },
+                label = { Text("Поиск по материалам") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 modifier = Modifier.weight(1f),
@@ -105,28 +113,23 @@ fun StatisticsScreen(
             Button(
                 onClick = {
                     focusManager.clearFocus()
-                    if (yearQuery.isNotBlank()) {
-                        viewModel.handleIntent(RequestIntent.LoadRequestsByYear(yearQuery))
-                    } else {
-                        viewModel.handleIntent(RequestIntent.LoadRequestsSortedByDateDesc)
-                    }
+                    viewModel.handleIntent(RequestIntent.LoadRequestsSortedByDateDesc)
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00)),
                 contentPadding = PaddingValues(0.dp)
             ) {
-                Text(text = "", color = Color.White)
+                Text(text = "Сортировка по годам", color = Color.White)
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
         LazyColumn(
             state = lazyListState,
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
             stickyHeader {
                 Text(
-                    text = "таблица с материалами и адресами",
+                    text = "Таблица с материалами и адресами",
                     fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()

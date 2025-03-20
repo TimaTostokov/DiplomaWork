@@ -45,9 +45,9 @@ fun AddRequestScreen(
     var status by remember { mutableStateOf("") }
     var masterFio by remember { mutableStateOf("") }
 
-    val contact = "+" + contactRaw
+    val contact = "+$contactRaw"
 
-    val statusOptions = listOf("зарегистрирована", "в работе", "выполнено", "снята")
+    val statusOptions = listOf("Зарегистрирована", "В работе", "Выполнена", "Снята")
     var expanded by remember { mutableStateOf(false) }
 
     val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text

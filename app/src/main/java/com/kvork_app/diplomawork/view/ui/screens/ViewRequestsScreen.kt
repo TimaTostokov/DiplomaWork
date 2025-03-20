@@ -55,7 +55,7 @@ fun ViewRequestsScreen(
 
     var searchQuery by remember { mutableStateOf("") }
 
-    val statusList = listOf("Все", "зарегана", "в работе", "выполнено", "снята")
+    val statusList = listOf("Все", "Зарегистрирована", "В работе", "Выполнена", "Снята")
     var expandedSort by remember { mutableStateOf(false) }
     var selectedSortStatus by remember { mutableStateOf("Все") }
 

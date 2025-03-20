@@ -23,24 +23,13 @@ class RequestViewModel(
 
     fun handleIntent(intent: RequestIntent) {
         when (intent) {
-            is RequestIntent.SaveRequest -> {
-                saveRequest(intent.request)
-            }
-            is RequestIntent.UpdateRequest -> {
-                updateRequest(intent.id, intent.newData)
-            }
-            RequestIntent.LoadAllRequests -> {
-                loadAllRequests()
-            }
-            RequestIntent.LoadRequestsSortedByDateDesc -> {
-                loadRequestsSortedByDateDesc()
-            }
-            RequestIntent.LoadRequestsSortedByDateAsc -> {
-                loadRequestsSortedByDateAsc()
-            }
-            is RequestIntent.LoadRequestsByYear -> {
-                loadRequestsByYear(intent.year)
-            }
+            is RequestIntent.SaveRequest -> saveRequest(intent.request)
+            is RequestIntent.UpdateRequest -> updateRequest(intent.id, intent.newData)
+            RequestIntent.LoadAllRequests -> loadAllRequests()
+            RequestIntent.LoadRequestsSortedByDateDesc -> loadRequestsSortedByDateDesc()
+            RequestIntent.LoadRequestsSortedByDateAsc -> loadRequestsSortedByDateAsc()
+            is RequestIntent.LoadRequestsByYear -> loadRequestsByYear(intent.year)
+            is RequestIntent.LoadRequestsByMaterial -> loadRequestsByMaterial(intent.material)
         }
     }
 
@@ -140,6 +129,18 @@ class RequestViewModel(
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {
             val list = repository.getRequestsByYear(year)
+            _state.value = _state.value.copy(
+                isLoading = false,
+                requests = list,
+                errorMessage = null
+            )
+        }
+    }
+
+    private fun loadRequestsByMaterial(material: String) {
+        _state.value = _state.value.copy(isLoading = true, errorMessage = null)
+        viewModelScope.launch {
+            val list = repository.getRequestsByMaterial(material)
             _state.value = _state.value.copy(
                 isLoading = false,
                 requests = list,

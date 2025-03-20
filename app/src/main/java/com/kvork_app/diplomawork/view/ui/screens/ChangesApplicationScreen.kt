@@ -133,7 +133,7 @@ fun ChangesApplicationScreen(
     var expandedMaterials by remember { mutableStateOf(false) }
     var selectedMaterials by remember { mutableStateOf(listOf<String>()) }
 
-    val statusOptions = listOf("зарегистрирована", "в работе", "выполнено", "снята")
+    val statusOptions = listOf("Зарегистрирована", "В работе", "Выполнена", "Снята")
     var expandedStatus by remember { mutableStateOf(false) }
 
     val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
@@ -161,7 +161,6 @@ fun ChangesApplicationScreen(
         }
     }
 
-    // При изменении requestId выполняется запрос заявки по ID
     LaunchedEffect(requestId) {
         if (requestId.isNotEmpty()) {
             viewModel.loadRequestById(requestId)

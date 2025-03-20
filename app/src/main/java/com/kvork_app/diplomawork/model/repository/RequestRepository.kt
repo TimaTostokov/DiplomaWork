@@ -72,12 +72,9 @@ class RequestRepository {
 
     suspend fun getRequestsSortedByDateDesc(): List<RequestItem> {
         return try {
-            val snapshot = db.collection(collectionName)
-                .orderBy("dateOfRegistration", Query.Direction.DESCENDING)
-                .get()
-                .await()
-            snapshot.documents.mapNotNull { doc ->
-                doc.toObject<RequestItem>()?.copy(id = doc.id)
+            val list = getAllRequests()
+            list.sortedByDescending {
+                it.dateOfRegistration.takeLast(4).toIntOrNull() ?: 0
             }
         } catch (e: Exception) {
             Log.e("RequestRepository", "Ошибка при сортировке заявок: ${e.message}", e)
@@ -85,14 +82,27 @@ class RequestRepository {
         }
     }
 
+
     suspend fun getRequestsByYear(year: String): List<RequestItem> {
         return try {
             val all = getAllRequests()
-            all.filter {
-                it.dateOfRegistration.startsWith(year)
+            all.filter { it.dateOfRegistration.startsWith(year) }
+        } catch (e: Exception) {
+            Log.e("RequestRepository", "Ошибка при фильтрации по году: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getRequestsByMaterial(material: String): List<RequestItem> {
+        return try {
+            val all = getAllRequests()
+            all.filter { request ->
+                request.materials.any { m ->
+                    m.contains(material, ignoreCase = true)
+                }
             }
         } catch (e: Exception) {
-            Log.e("RequestRepository", "Ошибка при фильтрации по го+ду: ${e.message}", e)
+            Log.e("RequestRepository", "Ошибка при поиске по материалам: ${e.message}", e)
             emptyList()
         }
     }
