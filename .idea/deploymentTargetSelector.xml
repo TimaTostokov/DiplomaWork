@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-03-19T10:16:20.380900300Z">
+        <DropdownSelection timestamp="2025-03-19T15:14:58.461941800Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\ACER\.android\avd\Pixel_Tablet_API_UpsideDownCakePrivacySandbox.avd" />

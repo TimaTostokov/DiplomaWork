@@ -90,6 +90,15 @@ class RequestViewModel(
         }
     }
 
+    fun loadRequestById(id: String) {
+        viewModelScope.launch {
+            val request = repository.getRequestById(id)
+            request?.let { req ->
+                _state.value = _state.value.copy(currentRequest = req)
+            }
+        }
+    }
+
     private fun loadAllRequests() {
         _state.value = _state.value.copy(isLoading = true, errorMessage = null)
         viewModelScope.launch {

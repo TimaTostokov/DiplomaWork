@@ -7,6 +7,7 @@ import com.google.firebase.firestore.ktx.toObject
 import com.kvork_app.diplomawork.model.dto.RequestItem
 import kotlinx.coroutines.tasks.await
 
+@Suppress("DEPRECATION")
 class RequestRepository {
 
     private val db = FirebaseFirestore.getInstance()
@@ -32,9 +33,21 @@ class RequestRepository {
 
     suspend fun updateRequestById(id: String, newData: RequestItem): Boolean {
         return try {
+            val updateMap = mutableMapOf<String, Any>(
+                "dateOfRegistration" to newData.dateOfRegistration,
+                "address" to newData.address,
+                "contact" to newData.contact,
+                "status" to newData.status,
+                "masterFio" to newData.masterFio,
+                "typeOfWork" to newData.typeOfWork,
+                "materials" to newData.materials
+            )
+            if (newData.description.isNotBlank()) {
+                updateMap["description"] = newData.description
+            }
             db.collection(collectionName)
                 .document(id)
-                .set(newData.copy(id = id))
+                .update(updateMap)
                 .await()
             true
         } catch (e: Exception) {
@@ -79,8 +92,21 @@ class RequestRepository {
                 it.dateOfRegistration.startsWith(year)
             }
         } catch (e: Exception) {
-            Log.e("RequestRepository", "Ошибка при фильтрации по году: ${e.message}", e)
+            Log.e("RequestRepository", "Ошибка при фильтрации по го+ду: ${e.message}", e)
             emptyList()
+        }
+    }
+
+    suspend fun getRequestById(id: String): RequestItem? {
+        return try {
+            val snapshot = db.collection(collectionName)
+                .document(id)
+                .get()
+                .await()
+            snapshot.toObject<RequestItem>()?.copy(id = snapshot.id)
+        } catch (e: Exception) {
+            Log.e("RequestRepository", "Ошибка при получении заявки по id: ${e.message}", e)
+            null
         }
     }
 }

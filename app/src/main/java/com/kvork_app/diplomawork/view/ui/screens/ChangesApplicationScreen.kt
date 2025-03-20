@@ -137,7 +137,7 @@ fun ChangesApplicationScreen(
     var expandedStatus by remember { mutableStateOf(false) }
 
     val formattedDate = DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
-    val formattedContact = "+" + contactRaw
+    val formattedContact = "+$contactRaw"
 
     val isFormValid = formattedDate.length == 10 &&
             address.isNotBlank() &&
@@ -148,13 +148,33 @@ fun ChangesApplicationScreen(
 
     val uiState by viewModel.state.collectAsState()
 
+    LaunchedEffect(uiState.currentRequest) {
+        uiState.currentRequest?.let { req ->
+            dateOfRegistrationRaw = req.dateOfRegistration
+            address = req.address
+            contactRaw = req.contact.removePrefix("+")
+            description = req.description
+            status = req.status
+            masterFio = req.masterFio
+            workType = req.typeOfWork
+            selectedMaterials = req.materials
+        }
+    }
+
+    // При изменении requestId выполняется запрос заявки по ID
+    LaunchedEffect(requestId) {
+        if (requestId.isNotEmpty()) {
+            viewModel.loadRequestById(requestId)
+        }
+    }
+
     if (uiState.success) {
         onUpdate()
         viewModel.clearSuccess()
     }
 
     uiState.errorMessage?.let { errorMsg ->
-        Toast.makeText(context, "Error update", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
     }
 
     ConstraintLayout(
