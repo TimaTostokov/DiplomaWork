@@ -52,7 +52,6 @@ fun ViewRequestsScreen(
     }
 
     val allRequests = uiState.requests
-
     var searchQuery by remember { mutableStateOf("") }
 
     val statusList = listOf("Все", "Зарегистрирована", "В работе", "Выполнена", "Снята")
@@ -64,11 +63,25 @@ fun ViewRequestsScreen(
             if (selectedSortStatus == "Все") true
             else request.status.equals(selectedSortStatus, ignoreCase = true)
 
-        val searchMatch =
-            request.description.contains(searchQuery, ignoreCase = true) ||
-                    request.id.contains(searchQuery, ignoreCase = true)
+        val query = searchQuery.trim().lowercase()
 
-        statusMatch && searchMatch
+        val isIdMatch = request.id.contains(searchQuery)
+
+        val searchMatch =
+            if (isIdMatch) {
+                true
+            } else {
+                request.dateOfRegistration.lowercase().contains(query) ||
+                        request.address.lowercase().contains(query) ||
+                        request.contact.lowercase().contains(query) ||
+                        request.description.lowercase().contains(query) ||
+                        request.status.lowercase().contains(query) ||
+                        request.masterFio.lowercase().contains(query) ||
+                        request.typeOfWork.lowercase().contains(query) ||
+                        request.materials.any { mat -> mat.lowercase().contains(query) }
+            }
+
+        statusMatch && (isIdMatch || searchMatch)
     }
 
     LazyColumn(
@@ -128,7 +141,7 @@ fun ViewRequestsScreen(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     singleLine = true,
-                    label = { Text("Поиск по описанию или ID") },
+                    label = { Text("Поиск") },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     leadingIcon = {
                         Icon(
@@ -150,7 +163,7 @@ fun ViewRequestsScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00AA00))
                     ) {
                         Text(
-                            text = "Сортировка",
+                            text = "Сортировать по статусу",
                             fontSize = 14.sp,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onPrimary
@@ -176,7 +189,7 @@ fun ViewRequestsScreen(
 
         stickyHeader {
             Text(
-                text = "таблица со всеми данными заявок",
+                text = "Таблица со всеми данными заявок",
                 fontSize = 14.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -193,29 +206,26 @@ fun ViewRequestsScreen(
 
 @Composable
 fun RequestRow(request: RequestItem) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 8.dp)
     ) {
-        Text(
-            text = "ID: ${request.id}",
-            fontSize = 14.sp,
-            color = Color.Black
-        )
-        Text(
-            text = request.description,
-            fontSize = 14.sp,
-            color = Color.Black
-        )
-        Text(
-            text = request.status,
-            fontSize = 14.sp,
-            color = Color.Black
-        )
+        Text(text = "ID: ${request.id}")
+        Text(text = "Дата регистрации: ${request.dateOfRegistration}")
+        Text(text = "Адрес: ${request.address}")
+        Text(text = "Контакт: ${request.contact}")
+        Text(text = "Описание: ${request.description}")
+        Text(text = "Тип работ: ${request.typeOfWork}")
+        if (request.materials.isNotEmpty()) {
+            Text(text = "Материалы: ${request.materials.joinToString()}")
+        }
+        Text(text = "Статус: ${request.status}")
+        Text(text = "Мастер ФИО: ${request.masterFio}")
+
+        Spacer(modifier = Modifier.height(6.dp))
+        Divider(color = Color.LightGray)
     }
-    Divider(color = Color.LightGray)
 }
 
 @Preview(showBackground = true, device = "spec:width=411dp,height=891dp", apiLevel = 34)
