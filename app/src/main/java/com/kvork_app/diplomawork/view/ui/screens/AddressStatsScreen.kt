@@ -144,6 +144,11 @@ fun AddressRow(item: RequestItem) {
         Text(text = "ID: ${item.id}")
         Text(text = "Адрес: ${item.address}")
         Text(text = "Описание: ${item.description}")
+        Text(text = "Контакт: ${item.contact}")
+        Text(text = "Тип работы: ${item.typeOfWork}")
+        Text(text = "Материалы: ${item.materials.joinToString()}")
+        Text(text = "Статус: ${item.status}")
+        Text(text = "Мастер: ${item.masterFio}")
     }
 }
 

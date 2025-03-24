@@ -440,7 +440,7 @@ fun ChangesApplicationScreen(
                         if (!isFormValid) {
                             Toast.makeText(
                                 context,
-                                "Пожалуйста, заполните все поля корректно",
+                                "Пожалуйста, измените хотя бы одно поле",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {

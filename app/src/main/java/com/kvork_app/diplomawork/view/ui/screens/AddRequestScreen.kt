@@ -52,11 +52,11 @@ fun AddRequestScreen(
     val formattedDate =
         DateVisualTransformation().filter(AnnotatedString(dateOfRegistrationRaw)).text
 
-    val isFormValid = formattedDate.length == 10 &&
-            address.isNotBlank() &&
-            contact.isNotBlank() &&
-            description.isNotBlank() &&
-            status.isNotBlank() &&
+    val isFormValid = formattedDate.isNotEmpty() ||
+            address.isNotBlank() ||
+            contact.isNotBlank() ||
+            description.isNotBlank() ||
+            status.isNotBlank() ||
             masterFio.isNotBlank()
 
     val uiState by viewModel.state.collectAsState()
@@ -236,7 +236,7 @@ fun AddRequestScreen(
                         if (!isFormValid) {
                             Toast.makeText(
                                 context,
-                                "Пожалуйста, заполните все поля корректно",
+                                "Пожалуйста, заполните хотя бы одно поле",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
