@@ -200,10 +200,12 @@ fun ChangesApplicationScreen(
         Image(
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = stringResource(R.string.logo_description),
-            modifier = Modifier.constrainAs(logoRef) {
-                top.linkTo(parent.top, margin = 16.dp)
-                start.linkTo(backBtnRef.end, margin = 8.dp)
-            }
+            modifier = Modifier
+                .size(60.dp)
+                .constrainAs(logoRef) {
+                    top.linkTo(parent.top, margin = 16.dp)
+                    start.linkTo(backBtnRef.end, margin = 8.dp)
+                }
         )
 
         Text(
